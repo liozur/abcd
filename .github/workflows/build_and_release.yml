@@ -1,0 +1,35 @@
+name: Build LaTeX and Release PDF
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build_pdf_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX document with xelatex
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          latexmk_use_xelatex: true
+          latexmk_options: -xelatex -interaction=nonstopmode -file-line-error -halt-on-error
+
+      - name: Rename PDF
+        run: mv main.pdf ${{ github.event.repository.name }}.pdf
+
+      - name: Create Release and Upload PDF
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ github.event.repository.name }}.pdf
+          name: ${{ github.event.head_commit.message }}
+          tag_name: ${{ github.sha }}
+          draft: false
+          prerelease: false
