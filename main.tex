@@ -1,0 +1,1191 @@
+%!TEX program = xelatex
+
+% FIXME: 让 \endnote 使用黑体数字
+% FIXME: 让 \endnote 可以用在 \title 上
+% FIXME: 让 \tdoc 与\taprt 在目录中显示页码范围
+% FIXME: \authornote 与 \editornote 之间的间距可能过小
+
+\documentclass[
+  zihao=5,
+  punct=kaiming,
+  linespread=1.4,% ?
+  sub4section,
+]{ctexbook}
+
+% ------------------------------------------------------------------------------
+% 导言
+% ------------------------------------------------------------------------------
+
+% ----------------------------------------------------------
+% 宏包
+% ----------------------------------------------------------
+
+\usepackage{bigfoot}
+\usepackage{calc}
+\usepackage{CJKfntef}
+
+\usepackage{enotez}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage[hidelinks,hyperfootnotes=true]{hyperref}
+\usepackage{lipsum}
+\usepackage{perpage}
+\usepackage{scrextend}
+\usepackage{tikz}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{truncate}
+\usepackage{ulem}
+\usepackage{xcolor}
+\usepackage{xunicode-addon}
+
+\raggedbottom
+\newsavebox{\headerbox}
+
+\usepackage{xeCJKfntef}
+\xeCJKsetup{underdot/symbol={\raisebox{-5pt}{◦}}}
+\newcommand{\dotemph}[1]{\CJKunderdot{#1}}
+
+% ----------------------------------------------------------
+% 字体
+% ----------------------------------------------------------
+
+% 字体样式
+\setCJKmainfont{FZShuSong}
+[
+  Path           = fonts/,
+  BoldFont       = FZHei,
+  ItalicFont     = FZKai,
+  BoldItalicFont = FZHei,
+]
+\setCJKsansfont{FZHei}[Path=fonts/]
+\setCJKmonofont{HYFangSong}[Path=fonts/]
+
+\setCJKfamilyfont{ss}{FZShuSong}[Path=fonts/]
+\setCJKfamilyfont{fs}{FZFangSong}[Path=fonts/]
+\setCJKfamilyfont{ht}{FZHei}[Path=fonts/]
+\setCJKfamilyfont{kt}{FZKai}[Path=fonts/]
+\setCJKfamilyfont{xb}{FZXiaoBiaoSong}[Path=fonts/]
+\setCJKfamilyfont{xh}{FZXiHeiI}[Path=fonts/]
+\setCJKfamilyfont{sz}{Berthold Baskerville Book}[Path=fonts/]
+
+\newCJKfontfamily\coverxb{FZXiaoBiaoSong}[Path=fonts/, FakeStretch=0.85]
+\newCJKfontfamily\coverxh{FZXiHeiI}[Path=fonts/, FakeStretch=0.85]
+
+\newCJKfontfamily\modifiedss{FZShuSong}[Path=fonts/, FakeStretch=0.9]
+\newCJKfontfamily\modifiedfs{FZFangSong}[Path=fonts/, FakeStretch=0.9]
+\newCJKfontfamily\modifiedht{FZHei}[Path=fonts/, FakeStretch=0.9]
+\newCJKfontfamily\modifiedkt{FZKai}[Path=fonts/, FakeStretch=0.9]
+\newCJKfontfamily\modifiedxb{FZXiaoBiaoSong}[Path=fonts/, FakeStretch=0.9]
+\newCJKfontfamily\modifiedxh{FZXiHeiI}[Path=fonts/, FakeStretch=0.9]
+
+\newCJKfontfamily\modifiedmodifiedss{FZShuSong}[Path=fonts/, FakeStretch=0.95]
+\newCJKfontfamily\modifiedmodifiedfs{FZFangSong}[Path=fonts/, FakeStretch=0.95]
+\newCJKfontfamily\modifiedmodifiedht{FZHei}[Path=fonts/, FakeStretch=0.95]
+\newCJKfontfamily\modifiedmodifiedkt{FZKai}[Path=fonts/, FakeStretch=0.95]
+\newCJKfontfamily\modifiedmodifiedxb{FZXiaoBiaoSong}[Path=fonts/,
+FakeStretch=0.95]
+\newCJKfontfamily\modifiedmodifiedxh{FZXiHeiI}[Path=fonts/, FakeStretch=0.95]
+
+% 标点样式
+\xeCJKEditPunctStyle{kaiming}
+{
+  fixed-margin-ratio = 0.000,
+  mixed-margin-ratio = 1.000,
+  middle-margin-ratio = 0.000,
+}
+
+% ----------------------------------------------------------
+% 版面
+% ----------------------------------------------------------
+
+\geometry{
+  paperwidth  = 437bp,
+  paperheight = 613bp,
+  top         = 94.3bp,
+  bottom      = 60.0bp,% ?
+  left        = 76.5bp,
+  right       = 66.5bp,
+  headsep     = 25.0bp,% 页眉与正文的距离
+  footskip    = 17.0bp,% 页脚与正文的距离
+  footnotesep = 11bp,
+}
+
+% ----------------------------------------------------------
+% 页眉/页脚/页码
+% ----------------------------------------------------------
+
+\pagestyle{fancy}
+
+\fancyhf{}% 清空页眉页脚
+
+% --------------------------------------
+% 页眉/页脚
+% --------------------------------------
+
+\renewcommand{\headrulewidth}{0bp}% 移除页眉线
+
+\fancyhead[RO]{\rightmark}% \chapter
+\fancyhead[LE]{\leftmark}% \section
+
+\renewcommand{\chaptermark}[1]{%
+  \sbox{\headerbox}{\small\modifiedxh#1}%
+  \ifdim\wd\headerbox > 20em
+  \def\theheadermark{\truncate[……]{20em}{\small\modifiedxh#1}}%
+  \else
+  \def\theheadermark{\small\modifiedxh#1}%
+  \fi
+  \markboth{\theheadermark}{}%
+}
+
+\renewcommand{\sectionmark}[1]{%
+  \sbox{\headerbox}{\small\modifiedxh#1}%
+  \ifdim\wd\headerbox > 20em
+  \def\theheadermark{\truncate[……]{20em}{\small\modifiedxh#1}}%
+  \else
+  \def\theheadermark{\small\modifiedxh#1}%
+  \fi
+  \markright{\theheadermark}%
+}
+
+% --------------------------------------
+% 页码
+% --------------------------------------
+
+\fancyfoot[RO]{\fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage}
+\fancyfoot[LE]{\fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage}
+% \fancyfootoffset[RO,LE]{\dimexpr\paperwidth-\textwidth-72bp-56.5bp}
+
+% 处理\part
+\assignpagestyle{\part}{empty}
+\fancypagestyle{empty}{%
+  \fancyhf{}%
+  \fancyfoot{}%
+}
+
+% 处理\chapter
+% \assignpagestyle{\chapter}{plain}% ? (useless)
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[RO]{%
+    \makebox[0pt][l]{%
+      \hspace{3.5bp}%  <-- 您可以在这里调整向右移动的距离
+      \fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage
+    }%
+  }
+  \fancyfoot[LE]{\fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage}%
+}
+
+% ----------------------------------------------------------
+% 脚注
+% ----------------------------------------------------------
+
+% use specific font inside \textcircled
+\AtBeginUTFCommand[\textcircled]{\begingroup\EnclosedNumbers}
+\AtEndUTFCommand[\textcircled]{\endgroup}
+
+% set char class and font for circled numbers
+% ref: https://stone-zeng.github.io/2019-02-09-circled-numbers
+\xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
+\newfontfamily\EnclosedNumbers{FZShuSong}[Path=fonts/]
+
+% \global\dimen\footins=\textheight
+%\interfootnotelinepenalty=99999
+
+\makeatletter
+
+% 允许 tex 动态调整脚注的高度
+% 避免脚注挤占页码区域
+\setlength{\skip\footins}{2\baselineskip plus 2\baselineskip minus
+2\baselineskip}
+
+% --------------------------------------
+% authornote
+%
+% 括号数字形式
+% --------------------------------------
+
+\DeclareNewFootnote{B}
+
+\newcommand\defaultfootnoterule{\vskip 8.0bp\hrule width 74bp height
+0.3bp\vskip 8.0bp}
+
+\let\fn@footnoteB\thefootnoteB
+\let\fn@fnfootnoteB\footnoteB
+
+\renewcommand{\thefootnoteB}{%
+  \CJKfamily{fs}%
+  \fontsize{8.0bp}{8.0bp}\selectfont% ?
+  （\fn@footnoteB）%
+}
+
+\newcommand{\authornote}[1]{%
+  \deffootnote[5em]{0em}{0em}{%
+    \raisebox{0.3bp}{%
+      \thefootnotemark\hspace{0.5em}% !
+    }%
+  }%
+  \fn@fnfootnoteB{%
+    \CJKfamily{fs}%
+    \fontsize{9.0bp}{9.5bp}\selectfont%
+    #1%
+  }%
+  \hspace{-0.2em}%
+}
+
+% --------------------------------------
+% editornote
+%
+% 带圈数字形式
+% --------------------------------------
+
+\DeclareNewFootnote{C}
+
+\renewcommand\extrafootnoterule{\vskip -4.0bp\hrule width \textwidth
+height 0.3bp\vskip 8.0bp}
+
+\let\fn@fnfootnoteC\footnoteC
+
+\renewcommand\thefootnoteC{%
+  \textcircled{%
+    \arabic{footnoteC}%
+  }%
+}
+
+\newcommand{\editornote}[1]{%
+  \hspace{0.1em}%
+  \deffootnote{2em}{0em}{%
+    \raisebox{0.4bp}{% ? (0.45bp)
+      \makebox[2em][l]{\thefootnotemark}% !
+    }%
+  }%
+  \fn@fnfootnoteC{%
+    \CJKfamily{fs}%
+    \fontsize{9.0bp}{9.5bp}\selectfont%
+    #1%
+  }%
+}
+
+\MakePerPage{footnoteC}
+
+\makeatother
+
+% --------------------------------------
+% endnote
+%
+% 黑体数字形式
+% --------------------------------------
+
+\setenotez{
+  list-heading=
+  \chapter*{\CJKfamily{kt}\fontsize{16.5bp}{16.5bp}\selectfont\ziju{1.500}{注释}},
+  backref=true
+}
+
+\renewcommand\enmark[1]{%
+  {\CJKfamily{ss}\fontsize{9.0bp}{9.75bp}\selectfont #1}\hspace{1em}%
+}
+
+\let\originalendnote\endnote
+
+\renewcommand{\endnote}[1]{%
+  \hspace{0.05em}%
+  \originalendnote{%
+    \begingroup
+    \leftskip=2.9em\relax%
+    \rightskip=0.1em\relax%
+    \CJKfamily{ss}%
+    \fontsize{9.0bp}{9.75bp}\selectfont%
+    \ziju{0.050}%
+    #1%
+    \par%
+    \endgroup%
+    \vspace{-0.6em}%
+  }%
+  \hspace{-0.05em}%
+}
+
+\fancypagestyle{endnotestyle}{%
+  \fancyhf{}% 首先清空当前的页眉页脚设置
+  \renewcommand{\headrulewidth}{0bp}% 确保无页眉线
+
+  % --- 设置您想要的注释页页眉 ---
+  % 奇数页页眉 (Right on Odd)
+  \fancyhead[RO]{\small\CJKfamily{xh}\scalebox{0.9}[1.0]{\ziju{1.5pt}{注释}}}
+  % 偶数页页眉 (Left on Even)
+  \fancyhead[LE]{\small\CJKfamily{xh}\scalebox{0.9}[1.0]{\ziju{1.5pt}{注释}}}
+
+  % --- 保持与正文一致的页脚 ---
+  \fancyfoot[RO]{%
+    \makebox[0pt][l]{%
+      \hspace{3.5bp}%
+      \fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage
+    }%
+  }
+  \fancyfoot[LE]{\hspace{-4.5bp}\makebox[0pt][r]{\fontspec{Berthold
+  Baskerville Book}[Path=fonts/]\thepage}}
+}
+
+% ----------------------------------------------------------
+% 目录/标题
+% ----------------------------------------------------------
+
+% 设置目录结构
+\ctexset{
+  tocdepth    = 10,
+  secnumdepth = 6,
+}
+
+% 设置目录抬头
+\renewcommand{\contentsname}{%
+  \CJKfamily{xb}%
+  \fontsize{16.5bp}{16.5bp}\selectfont\ziju{1.500}% ? (行距)
+  目录%
+}
+
+% --------------------------------------
+% ALL
+% --------------------------------------
+
+%\titlecontents{⟨section⟩}[⟨left⟩]
+%              {⟨above-code⟩}
+%              {⟨numbered-entry-format⟩}
+%              {⟨numberless-entry-format⟩}
+%              {⟨filler-page-format⟩}[⟨below-code⟩]
+
+%\titleformat{⟨command⟩}[⟨shape⟩]
+%            {⟨format⟩}{⟨label⟩}{⟨sep⟩}
+%            {⟨before-code⟩}[⟨after-code⟩]
+
+%\titlespacing{⟨command⟩}
+%             {⟨left⟩}
+%             {⟨before-sep⟩}
+%             {⟨after-sep⟩}
+%             [⟨right-sep⟩]
+
+% --------------------------------------
+% part
+% --------------------------------------
+
+% ------------------
+% part - TOC
+% ------------------
+
+\titlecontents{part}[0bp]% ? (居中)
+{%
+  \fontspec{Berthold Baskerville Book}[Path=fonts/]%
+  \fontsize{14.5bp}{14.5bp}\selectfont\ziju{0.100}% ? (字号(放大), 行距)
+  \centering%
+  \vspace{7.5bp}% ? (前后距: 16bp)
+}%
+{}%
+{}%
+{}[\vspace{5.5bp}]% ? (前后距: 16bp)
+
+% ------------------
+% part - Title
+% ------------------
+
+\newcommand\partbox{%
+  \centering%
+  \begin{minipage}{0.80\textwidth}% ? (宽度)
+    \fontspec{Berthold Baskerville Book}[Path=fonts/]%
+    \fontsize{32.0bp}{32.0bp}\selectfont\ziju{0.100}% ? (行距)
+    \centering%
+  }
+
+  \titleformat{\part}[display]%
+  {\partbox}{}{0bp}%
+  {}[
+\end{minipage}]
+
+\ctexset{
+  part / name   = ,
+  part / number = \hspace{-1em},
+}
+
+\ctexset{
+  part / fixskip    = true,
+  part / afterskip  = ,
+  part / beforeskip = ,
+}
+
+% --------------------------------------
+% chapter
+% --------------------------------------
+
+% ------------------
+% chapter - TOC
+% ------------------
+
+\titlecontents{chapter}[0bp]%
+{%
+  \CJKfamily{xb}% ? (与小标宋略有不同)
+  \fontsize{9.5bp}{9.5bp}\selectfont\ziju{0.150}% ? (行距)
+  \vspace{3bp}%
+}%
+{}%
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% chapter - Title
+% ------------------
+
+\newcommand\chapterbox{%
+  \centering%
+  \begin{minipage}{0.80\textwidth}% ? (宽度)
+    \modifiedmodifiedxb%
+    \fontsize{16.5bp}{18.0bp}\selectfont\ziju{0.050}%
+    \centering%
+  }
+
+  \titleformat{\chapter}[display]%
+  {\chapterbox}{}{0bp}%
+  {}[
+\end{minipage}]
+
+\titlespacing{\chapter}%
+{0bp}%
+{0bp}%
+{18.0bp}% ? (前后距: 32bp)
+
+\ctexset{
+  chapter / fixskip    = true,
+  chapter / afterskip  = ,
+  chapter / beforeskip = ,
+}
+
+% --------------------------------------
+% chapterx
+% --------------------------------------
+
+\titleclass{\chapterx}{straight}[\part]
+
+\newcounter{chapterx}[part]
+\renewcommand\thechapterx{\hspace{-1em}}
+
+% ------------------
+% chapterx - TOC
+% ------------------
+
+\titlecontents{chapterx}[0bp]%
+{%
+  \CJKfamily{fs}% ? (与小标宋略有不同)
+  \fontsize{10.5bp}{10.5bp}\selectfont\ziju{0.050}% ? (行距)
+  \vspace{3bp}%
+}%
+{}%
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% chapterx - Title
+% ------------------
+
+\newcommand\chapterxbox{%
+  \centering%
+  \begin{minipage}{0.80\textwidth}% ? (宽度)
+    \modifiedmodifiedxb% ? (无法修改)
+    \fontsize{16.5bp}{18.0bp}\selectfont\ziju{0.050}%
+    \centering%
+  }
+
+  \titleformat{\chapterx}[display]%
+  {\chapterxbox}{}{0bp}%
+  {}[
+\end{minipage}]
+
+\titlespacing{\chapterx}%
+{0bp}%
+{0bp}%
+{18.0bp}% ? (前后距: 32bp)
+
+%\ctexset{
+%    chapterx / fixskip    = true,
+%    chapterx / afterskip  = ,
+%    chapterx / beforeskip = ,
+%}
+
+% --------------------------------------
+% section
+% --------------------------------------
+
+% ------------------
+% section - TOC
+% ------------------
+
+\titlecontents{section}[2em]%
+{%
+  \CJKfamily{fs}%
+  \fontsize{9.5bp}{9.5bp}\selectfont\ziju{-0.050}% ? (行距)
+  \vspace{3bp}%
+}%
+{\contentspush{\thecontentslabel\hspace{1em}}}% ? (换行过晚)
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% section - Title
+% ------------------
+
+\newcommand\sectionbox{%
+  \centering%
+  \begin{minipage}{0.50\textwidth}%
+    \modifiedmodifiedxh%
+    \fontsize{14.5bp}{15.5bp}\selectfont\ziju{0.025}%
+    \centering%
+  }
+
+  \titleformat{\section}%
+  [display]%
+  {\sectionbox}%
+  {\ziju{0.5}第\chinese{section}篇}%
+  {5.0bp}%
+  {}%
+  [
+\end{minipage}]
+
+\ctexset{
+  section / name   = {第,篇},
+  section / number = \chinese{section},
+}
+
+\ctexset{
+  section / fixskip    = true,
+  section / afterskip  = ,
+  section / beforeskip = ,
+}
+
+\titlespacing{\section}%
+{0bp}%
+{28.0bp}%
+{26.0bp}% ? (前后距: 32bp)
+
+% --------------------------------------
+% subsection
+% --------------------------------------
+
+% ------------------
+% subsection - TOC
+% ------------------
+
+\titlecontents{subsection}[2em]%
+{%
+  \CJKfamily{ss}%
+  \fontsize{9.0bp}{9.0bp}\selectfont\ziju{0.010}% ? (行距)
+  \vspace{3bp}%
+}%
+{\contentspush{\thecontentslabel\hspace{1em}}}% ? (换行过晚)
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% subsection - Title
+% ------------------
+
+\newcommand\subsectionbox{%
+  \centering%
+  \begin{minipage}{0.70\textwidth}%
+    \modifiedmodifiedss%
+    \fontsize{14.0bp}{15.0bp}\selectfont\ziju{0.025}%
+    \centering%
+  }
+
+  \titleformat{\subsection}%
+  [display]%
+  {\subsectionbox}%
+  {\ziju{0.5}第\chinese{subsection}章}%
+  {5.0bp}%
+  {}%
+  [
+\end{minipage}]
+
+\ctexset{
+  subsection / name   = {第,章},
+  subsection / number = \chinese{subsection},
+}
+
+\ctexset{
+  subsection / fixskip    = true,
+  subsection / afterskip  = ,
+  subsection / beforeskip = ,
+}
+
+\titlespacing{\subsection}%
+{0bp}%
+{14.5bp}%
+{13.0bp}% ? (前后距: 18bp)
+
+% --------------------------------------
+% subsubsection
+% --------------------------------------
+
+% ------------------
+% subsubsection - TOC
+% ------------------
+
+\titlecontents{subsubsection}[4em]%
+{%
+  \CJKfamily{ss}%
+  \fontsize{9.0bp}{9.0bp}\selectfont\ziju{0.010}% ? (行距)
+  \vspace{3bp}%
+}%
+{\contentspush{\thecontentslabel\hspace{1em}}}%
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% subsubsection - Title
+% ------------------
+
+\newcommand\subsubsectionbox[1]{%
+  \begin{center}%
+    \begin{minipage}{0.60\textwidth}%
+      \modifiedmodifiedss%
+      \fontsize{12.5bp}{14.5bp}\selectfont\ziju{0.025}%
+      \centering%
+      #1%
+    \end{minipage}%
+  \end{center}%
+}
+
+\ctexset{
+  subsubsection / name       = {,．},
+  subsubsection / number     = \arabic{subsubsection},
+  subsubsection / format     = \subsubsectionbox,
+  subsubsection / aftername  = ,
+}
+
+\ctexset{
+  subsubsection / fixskip    = true,
+  subsubsection / afterskip  = ,
+  subsubsection / beforeskip = ,
+}
+
+\titlespacing{\subsubsection}%
+{0bp}%
+{19.5bp}%
+{9.0bp}% ? (前后距: 24bp)
+
+% --------------------------------------
+% paragraph
+% --------------------------------------
+
+% ------------------
+% paragraph - TOC
+% ------------------
+
+\titlecontents{paragraph}[6em]%
+{%
+  \CJKfamily{ss}%
+  \fontsize{9.0bp}{9.0bp}\selectfont\ziju{0.010}%
+  \vspace{3bp}%
+}%
+{\contentspush{\thecontentslabel\hspace{1em}}}%
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% paragraph - Title
+% ------------------
+
+\newcommand\paragraphbox[1]{%
+  \begin{center}%
+    \begin{minipage}{0.80\textwidth}% ? (宽度)
+      \modifiedmodifiedss%
+      \fontsize{12.5bp}{12.5bp}\selectfont\ziju{0.010}% ? (行距)
+      \centering%
+      #1%
+    \end{minipage}%
+  \end{center}%
+}
+
+\ctexset{
+  paragraph / name       = {,．},
+  paragraph / number     = \Alph{paragraph},
+  paragraph / format     = \paragraphbox,
+  paragraph / aftername  = ,
+}
+
+\ctexset{
+  paragraph / fixskip    = true,
+  paragraph / afterskip  = ,
+  paragraph / beforeskip = ,
+}
+
+\titlespacing{\paragraph}%
+{0bp}%
+{18.0bp}%
+{9.0bp}% ? (前后距: 24bp)
+
+% --------------------------------------
+% subparagraph
+% --------------------------------------
+
+% ------------------
+% subparagraph - TOC
+% ------------------
+
+\titlecontents{subparagraph}[8em]%
+{%
+  \CJKfamily{ss}%
+  \fontsize{9.0bp}{9.0bp}\selectfont\ziju{0.010}%
+  \vspace{3bp}%
+}%
+{\contentspush{\thecontentslabel\hspace{1em}}}%
+{}%
+{\hspace{3bp}\titlerule*[.4em]{$\cdot$}\contentspage}
+
+% ------------------
+% subparagraph - Title
+% ------------------
+
+\newcommand\subparagraphbox[1]{%
+  \begin{center}%
+    \begin{minipage}{0.80\textwidth}% ? (宽度)
+      \CJKfamily{ht}%
+      \fontsize{10.5bp}{10.5bp}\selectfont\ziju{0.010}% ? (行距)
+      \centering%
+      #1%
+    \end{minipage}%
+  \end{center}%
+}
+
+\ctexset{
+  subparagraph / name         = {\CJKfamily{ss}（,\CJKfamily{ss}）},
+  subparagraph / number       = \arabic{subparagraph},
+  subparagraph / format       = \subparagraphbox,
+  subparagraph / numberformat = \bf,% ? (数字字体)
+  subparagraph / aftername    = ,
+}
+
+\ctexset{
+  subparagraph / fixskip      = true,
+  subparagraph / afterskip    = ,
+  subparagraph / beforeskip   = ,
+}
+
+\titlespacing{\subparagraph}%
+{0bp}%
+{0bp}% ?
+{-1bp}% ? (前后距: 16bp, 前距无法调整!)
+
+% ----------------------------------------------------------
+% 其他
+% ----------------------------------------------------------
+
+% ------------------
+% vicetitle
+% ------------------
+
+\newcommand{\vicetitle}[1]{%
+  \vspace{-3.0bp}% 前距: 10bp
+  \begin{center}%
+    \begin{minipage}[t]{\textwidth}%
+      \CJKfamily{fs}%
+      \fontsize{10.5bp}{10.5bp}\selectfont\ziju{0.010}%
+      \centering%
+      （#1）
+    \end{minipage}%
+    \vspace{18.5bp}% 后距: 32bp
+  \end{center}%
+}
+
+% ------------------
+% quote
+% ------------------
+
+\renewenvironment{quote}
+{%
+  \list{}{\rightmargin=0pt \leftmargin=0pt}%
+\item[]\relax\vspace{0.2em}
+  \fontsize{9.0bp}{9.75bp}\selectfont
+  \hspace*{2em}%
+}
+{%
+  \vspace{-0.2em}\endlist
+}
+
+% ------------------
+% closing
+% ------------------
+
+\newcommand{\closing}[2]{%
+  \vspace{10.5bp}% 前距: 25bp
+  \begin{flushright}%
+    \CJKfamily{fs}%
+    \fontsize{9.0bp}{9.5bp}\selectfont\ziju{0.010}%
+    #1
+    \if\relax#2\relax%
+    %
+    \else%
+    \par#2%
+    \fi%
+  \end{flushright}%
+}
+
+% ------------------
+% info
+% ------------------
+
+\newcommand{\info}[4]{%
+  \vspace{-4.0bp}% 前距: 25bp
+  \begin{center}%
+    \begin{minipage}[t]{\textwidth}%
+      \begin{minipage}[t]{0.40\textwidth}%
+        \begin{minipage}[t]{\textwidth}%
+          \CJKfamily{ss}%
+          \fontsize{9.0bp}{9.5bp}\selectfont\ziju{0.010}%
+          #1%
+        \end{minipage}%
+        \\%
+        \raisebox{-10bp}{%
+          \begin{minipage}[t]{\textwidth}%
+            \CJKfamily{ss}%
+            \fontsize{9.0bp}{9.5bp}\selectfont\ziju{0.010}%
+            #2%
+          \end{minipage}%
+        }%
+      \end{minipage}%
+      \hfill%
+      \begin{minipage}[t]{0.40\textwidth}%
+        \begin{minipage}[t]{\textwidth}%
+          \CJKfamily{ss}%
+          \fontsize{9.0bp}{9.5bp}\selectfont\ziju{0.010}%
+          #3%
+        \end{minipage}%
+        \\%
+        \raisebox{-10bp}{%
+          \begin{minipage}[t]{\textwidth}%
+            \CJKfamily{ss}%
+            \fontsize{9.0bp}{9.5bp}\selectfont\ziju{0.010}%
+            #4%
+          \end{minipage}%
+        }%
+      \end{minipage}%
+    \end{minipage}%
+  \end{center}%
+}
+
+% ------------------
+% todo
+% ------------------
+
+\newcommand{\todo}{%
+  \par\vspace{12bp}%
+  \noindent%
+  \makebox[\textwidth][c]{%
+    \begin{tikzpicture}%
+      \node[%
+        draw,%
+        rectangle,%
+        line width=1pt,%
+        minimum height=5\baselineskip,%
+        text width=0.8\textwidth,%
+        align=center%
+      ]%
+      {这里应该添加一张图像或者一段文字};%
+    \end{tikzpicture}%
+  }%
+  \par\vspace{4bp}%
+}
+
+% ------------------
+% centerbox
+% ------------------
+
+\newcommand{\centerbox}[1]{%
+  \par\removelastskip\vspace{\dimexpr\baselineskip - 1em\relax}%
+  \noindent%
+  \makebox[\textwidth][c]{%
+    \begin{minipage}{\textwidth}%
+      \centering%
+      #1%
+    \end{minipage}%
+  }%
+  \par\removelastskip\vspace{\dimexpr\baselineskip - 1em\relax}%
+}
+
+% ------------------
+% imagebox
+%
+% 这个命令没有可选的标题参数，请将标题包括在图像中
+% ------------------
+
+\newcommand{\imagebox}[1]{%
+  \par\vspace{\dimexpr\baselineskip - 1em\relax}%
+  \noindent%
+  \makebox[\textwidth][c]{%
+    \includegraphics[width=\textwidth]{#1}%
+  }%
+  \par\vspace{\dimexpr\baselineskip - 1.8em\relax}%
+}
+
+% ------------------
+% indentpara
+% ------------------
+
+\newcommand{\indentpara}[1]{%
+  \noindent\hangindent=#1 \hangafter=0%
+}
+
+% ------------------
+% fontbox
+% ------------------
+
+\newcommand{\fontbox}[1]{%
+  \raisebox{0.15ex}{#1}%
+}
+
+% ------------------------------------------------------------------------------
+% makecover
+% ------------------------------------------------------------------------------
+
+% \newcommand{\makecover}[2][\relax]{%
+%   \cleardoublepage% 確保從一個新的右頁開始
+%   \thispagestyle{empty}% 此頁面無頁眉頁腳
+%   {%
+%     \vspace*{\fill}% 向上推開，實現垂直居中
+%     \begin{center}% 水平居中
+%       \vspace{-3em}
+%       {\CJKfamily{coverxb}\fontsize{40bp}{50bp}\selectfont\ziju{0.200} #2\par}
+%
+%       \vspace{2.5cm}% 標題與作者之間的距離
+%
+%       % 作者 (可選)
+%       \ifx#1\relax
+%       % 如果作者參數未提供，則不輸出任何內容
+%       \else
+%       {\CJKfamily{coverxh}\fontsize{16bp}{24bp}\selectfont #1\par}
+%       \fi
+%     \end{center}
+%     \vspace*{\fill}% 向下推開，實現垂直居中
+%   }
+%   \cleardoublepage% 結束封面頁，確保正文從新的右頁開始
+% }
+
+% ------------------------------------------------------------------------------
+% makeinfo
+% ------------------------------------------------------------------------------
+
+\definecolor{deepred}{rgb}{0.6, 0, 0}
+
+% \newcommand{\makeinfo}[1]{%
+%   \cleardoublepage% 強制開始一個新的右側頁面 (奇數頁)
+%   \thispagestyle{empty}% 此頁面無頁眉頁腳
+%     \begin{center}% 水平居中
+%       {\color{deepred}\CJKfamily{xb}\fontsize{14bp}{17.5bp}\selectfont\ziju{0.200} #1\par}
+%     \end{center}
+% }
+
+% --------------------------------------
+% 重命名
+%
+% 年份（可选）\tyear
+% 文档        \tdoc
+% 篇（可选）  \tpart
+% 章          \tchapter
+% 节-1.       \tsection
+% 子节-A.     \tsubsection
+% 小节-(1)    \tsubsubsection
+% --------------------------------------
+
+% 年份
+\newcommand{\tyear}[1]{%
+  \cleardoublepage% 强制开始一个新页面
+  \thispagestyle{empty}% 将这个新页面的样式设为 empty
+  \part{#1}\label{#1}%
+}
+
+% 文档
+\newcommand{\tdoc}[1]{%
+  \cleardoublepage% 强制开始一个新页面
+  \thispagestyle{empty}% 将这个新页面的样式设为 empty
+  % --- 开始 ---
+  % 暂时让 \thispagestyle 命令失效，以阻止 \chapter 命令覆盖上面的 empty 设置
+  \let\oldthispagestyle\thispagestyle
+  \renewcommand{\thispagestyle}[1]{}%
+  % --- 结束 ---
+  \chapter{#1}\label{#1}%
+  % --- 恢复 ---
+  % 恢复 \thispagestyle 的原始功能，以保证后续页面正常
+  \let\thispagestyle\oldthispagestyle
+}
+
+% 篇、卷、册
+\newcommand{\tpart}[1]{%
+  \cleardoublepage% 强制开始一个新页面
+  \section{#1}\label{#1}%
+}
+
+% 无编号篇、卷、册
+\newcommand{\tpartnonum}[1]{%
+  \cleardoublepage% 强制开始一个新页面
+  \section*{#1}\label{#1}%
+  \addcontentsline{toc}{section}{#1}%
+  \partmark{#1}%
+}
+
+% 章
+\newcommand{\tchapter}[1]{%
+  \clearpage% 强制开始一个新页面
+  \subsection{#1}\label{#1}%
+}
+
+% 无编号章
+\newcommand{\tchapternonum}[1]{%
+  \clearpage% 强制开始一个新页面
+  \subsection*{#1}\label{#1}%
+  \addcontentsline{toc}{subsection}{#1}%
+  \chaptermark{#1}%
+}
+
+% 节 (1.)
+\newcommand{\tsection}[1]{%
+  \subsubsection{#1}\label{#1}%
+}
+
+% 无编号节
+\newcommand{\tsectionnonum}[1]{%
+  \subsubsection*{#1}\label{#1}%
+  \addcontentsline{toc}{subsubsection}{#1}%
+  \sectionmark{#1}%
+}
+
+% 子节 (A.)
+\newcommand{\tsubsection}[1]{%
+  \paragraph{#1}\label{#1}%
+}
+
+% 无编号子节
+\newcommand{\tsubsectionnonum}[1]{%
+  \paragraph*{#1}\label{#1}%
+  \addcontentsline{toc}{paragraph}{#1}%
+}
+
+% 小节 ((1))
+\newcommand{\tsubsubsection}[1]{%
+  \subparagraph{#1}\label{#1}%
+}
+
+% 无编号小节
+\newcommand{\tsubsubsectionnonum}[1]{%
+  \subparagraph*{#1}\label{#1}%
+  \addcontentsline{toc}{subparagraph}{#1}%
+}
+
+% ------------------------------------------------------------------------------
+% 正文
+% ------------------------------------------------------------------------------
+
+\begin{document}
+
+% -- 封面 (原 \makecover 命令) --
+\cleardoublepage% 確保從一個新的右頁開始
+\thispagestyle{empty}% 此頁面無頁眉頁腳
+{%
+  \vspace*{\fill}% 向上推開，實現垂直居中
+  \begin{center}% 水平居中
+    \vspace{-3em}
+    % 標題
+    {\CJKfamily{coverxb}\fontsize{40bp}{50bp}\selectfont\ziju{0.200} 剩余价值理论\par}
+    % 作者部分因原命令未提供參數，故留空
+  \end{center}
+  \vspace*{\fill}% 向下推開，實現垂直居中
+}
+\cleardoublepage% 結束封面頁，確保正文從新的右頁開始
+
+% -- 資訊頁 (原 \makeinfo 命令) --
+\cleardoublepage% 強制開始一個新的右側頁面 (奇數頁)
+\thispagestyle{empty}% 此頁面無頁眉頁腳
+{\color{deepred}\CJKfamily{xb}\fontsize{14bp}{14.5bp}\selectfont\ziju{0.100}%
+  % \setlength{\parindent}{2.0em}\indent%
+  % ~“我无须在这里再次批驳斯大林及其代理人的愚妄和无耻诽谤：我的革命荣誉没有任何污点。无论直接还是间接，我从未同工人阶级的敌人在幕后达成协议或者进行谈判。由于受到类似的诬陷，成千上万反对斯大林的人已惨遭屠戮。新一代的革命者必将为他们恢复政治名誉，对克里姆林宫的刽子手们，也一定会 ‘论功行赏’ 。”~
+  \center 全世界无产者，联合起来！
+\par}
+
+\frontmatter
+\pagenumbering{arabic}
+
+% --------------------------------------
+
+% 字间距
+\xeCJKsetup{CJKglue={\hskip 0bp plus 0.02\baselineskip minus
+0.000\baselineskip}}
+
+% 段间距
+\setlength{\parskip}{0bp}
+
+% --------------------------------------
+
+\clearpage
+\fancyhf{}% 清空所有
+\renewcommand{\headrulewidth}{0bp}% 无页眉线
+
+% 页眉
+\fancyhead[RO]{\small\CJKfamily{xh}\scalebox{0.9}[1.0]{\ziju{1.5pt}{目录}}}
+\fancyhead[LE]{\small\CJKfamily{xh}\scalebox{0.9}[1.0]{\ziju{1.5pt}{目录}}}
+% 页脚
+\fancyfoot[RO]{%
+  \makebox[0pt][l]{%
+    \hspace{3.5bp}%  <-- 您可以在这里调整向右移动的距离
+    \fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage
+  }%
+}
+\fancyfoot[LE]{\hspace{-4.5bp}\makebox[0pt][r]{\fontspec{Berthold
+Baskerville Book}[Path=fonts/]\thepage}}
+% \fancyfootoffset[RO,LE]{\dimexpr\paperwidth-\textwidth-72bp-10.5bp}
+\pagestyle{fancy}% 应用刚刚重定义好的fancy样式
+
+\tableofcontents
+
+\mainmatter
+
+\clearpage
+\fancyhf{}% 再次清空所有
+\renewcommand{\headrulewidth}{0bp}% 无页眉线
+
+% 页眉恢复
+\fancyhead[RO]{\rightmark}
+\fancyhead[LE]{\leftmark}
+% 页脚不变
+\fancyfoot[RO]{%
+  \makebox[0pt][l]{%
+    \hspace{3.5bp}%  <-- 您可以在这里调整向右移动的距离
+    \fontspec{Berthold Baskerville Book}[Path=fonts/]\thepage
+  }%
+}
+\fancyfoot[LE]{\hspace{-4.5bp}\makebox[0pt][r]{\fontspec{Berthold
+Baskerville Book}[Path=fonts/]\thepage}}
+% \fancyfootoffset[RO,LE]{\dimexpr\paperwidth-\textwidth-72bp-56.5bp}
+\pagestyle{fancy}
+
+\markboth{}{}
+
+% --------------------------------------
+
+\input{texts/1}
+\input{texts/2}
+\input{texts/3}
+
+% --------------------------------------
+
+\cleardoublepage% 从奇数页开始
+
+\pagestyle{endnotestyle}
+
+\printendnotes
+
+\addcontentsline{toc}{chapter}{注释}
+
+% --------------------------------------
+
+\end{document}
+
+% ------------------------------------------------------------------------------
+% EOF
+% ------------------------------------------------------------------------------
