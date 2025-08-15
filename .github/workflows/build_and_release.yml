@@ -25,11 +25,23 @@ jobs:
       - name: Rename PDF
         run: mv src/main.pdf src/${{ github.event.repository.name }}.pdf
 
+      - name: Create and push tag
+        id: create_tag
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "[email protected]"
+
+          TAG=v$(date -Iseconds | sed 's/[T:\+]/-/g')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          git tag -a $TAG -m "$TAG" ${GITHUB_SHA}
+          git push origin $TAG
+
       - name: Create Release and Upload PDF
         uses: softprops/action-gh-release@v1
         with:
           files: src/${{ github.event.repository.name }}.pdf
           name: ${{ github.event.head_commit.message }}
-          tag_name: ${{ github.sha_short }}
+          tag_name: ${{ steps.create_tag.outputs.tag }}
           draft: false
           prerelease: false
