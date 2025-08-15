@@ -18,8 +18,8 @@ jobs:
       - name: Compile LaTeX document with xelatex
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: src/main.tex
           working_directory: src
+          root_file: main.tex
           latexmk_use_xelatex: true
 
       - name: Rename PDF
