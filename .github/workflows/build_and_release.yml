@@ -18,7 +18,7 @@ jobs:
       - name: Compile LaTeX document with xelatex
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: main.tex
+          root_file: src/main.tex
           latexmk_use_xelatex: true
           latexmk_options: -xelatex -interaction=nonstopmode -file-line-error -halt-on-error
 
@@ -30,6 +30,6 @@ jobs:
         with:
           files: ${{ github.event.repository.name }}.pdf
           name: ${{ github.event.head_commit.message }}
-          tag_name: ${{ github.sha }}
+          tag_name: v${{ github.run_number }}
           draft: false
           prerelease: false
