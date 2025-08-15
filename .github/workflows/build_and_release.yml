@@ -23,12 +23,12 @@ jobs:
           latexmk_options: -xelatex -interaction=nonstopmode -file-line-error -halt-on-error
 
       - name: Rename PDF
-        run: mv main.pdf ${{ github.event.repository.name }}.pdf
+        run: mv src/main.pdf src/${{ github.event.repository.name }}.pdf
 
       - name: Create Release and Upload PDF
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ github.event.repository.name }}.pdf
+          files: src/${{ github.event.repository.name }}.pdf
           name: ${{ github.event.head_commit.message }}
           tag_name: ${{ github.sha_short }}
           draft: false
