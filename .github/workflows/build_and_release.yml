@@ -30,6 +30,6 @@ jobs:
         with:
           files: ${{ github.event.repository.name }}.pdf
           name: ${{ github.event.head_commit.message }}
-          tag_name: v${{ github.run_number }}
+          tag_name: ${{ github.sha_short }}
           draft: false
           prerelease: false
